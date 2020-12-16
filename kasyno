@@ -266,7 +266,8 @@ public class Kasyno {
                     if (arrOfInputCounts2.size() == 6) {
                         break;
                     }
-                    if(input < 1){
+                    if(input < 0){
+                    
                         System.out.println("Nie możesz podawać liczb na minusie");
                     }
                 }
