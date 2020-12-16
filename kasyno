@@ -1,0 +1,360 @@
+package com.company;
+
+
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.*;
+
+
+public class Kasyno {
+    public static BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+    public static int choice;
+    public static void main(String[] args) throws IOException, NumberFormatException, InterruptedException {
+        menuInterface();
+    }
+
+    public static void menuInterface() throws IOException, InterruptedException{
+        System.out.println("Witaj w aplikajci KasynoWa !!! \n Aplikajca oferuje ci narazie 2 dostępne gry \n Mianowicie : Lotto i Ruletkę, wybierz opcje 1,żeby zagrać w Ruletkę, a 2, żeby zagrać w Kumulacji Lotto!");
+        System.out.println("Zasady będą wyjaśnione, gdy tylko wybierzesz tryb gry.\n Powodzenia !!!");
+        System.out.println("Jeśli chcesz wyjść z gry, to wpisz 3;");
+        Ruletka ruletka = new Ruletka();
+        Lotto lotto = new Lotto();
+
+        for (;;) {
+            try {
+                choice = Integer.parseInt(bufferedReader.readLine());
+                switch (choice) {
+                    case 1:
+                        ruletka.grand();
+                        break;
+
+                    case 2:
+                        lotto.grand();
+                        break;
+                    case 3:
+                        System.out.println("Dziękujemy za pobyt w kasynie!!!");
+                        System.exit(0);
+                        break;
+
+                    default:
+                        System.out.println("Trzeba podać 1 lub 2");
+                }
+            }
+            catch (NumberFormatException e){
+                System.out.println("Pierwsze sprawdzanko?");
+            }
+        }
+    }
+
+
+    public static class Ruletka{
+        private static int roller;
+        private static int lose;
+        private static int reward = 1000;
+        private static int rollee;
+
+        //metoda grand wywołuje wszystke pozsotałe funkcje w klasie Ruletka
+        public static void grand() throws IOException,InterruptedException{
+            System.out.println("Witaj w dziale Ruletki,\n Po pierwsze, musisz podać liczbę(0-36),\nNastępnie musisz postawić pieniądze(Masz na początku do wyboru 1000 zł)");
+            System.out.println("Teraz musisz sprawdzić czy wygrałeś(Wyświetli ci się komunikat o stanie twojego konta)");
+            System.out.println("Psst, jeszcze jedno, a w zasadzie kilka rzeczy.");
+            System.out.println("System ma zabezpieczenia przed wpisywniem głupot takich jak liczby -1,0,NULL itp. ");
+            System.out.println("W ruletce nie możesz zgadnąć liczby z poza przedziału 0-36. Nie możesz postawić mniej/ więcej pieniędzy niż rzeczywiście masz.Powodzenia.");
+            roll();
+            System.out.println("\n");
+            System.out.println("Podaj swój strzał");
+            inputData();
+            System.out.println("ile chcesz postawić?");
+            howMuch();
+            System.out.println("Pozostałe saldo to "+reward+" zł.");
+            printRoll();
+            checkingReward();
+            System.out.println("Twoje środki wynoszą teraz "+ reward + "zł!!");
+            System.out.println("");
+            loopedGame();
+
+        }
+
+        public static int roll(){
+            Random genrator = new Random();
+            int count = genrator.nextInt(37);
+            rollee = count;
+
+            return count;
+        }
+        private static void printRoll() throws InterruptedException{
+            Thread.sleep(3000);
+            System.out.println("Wylosowana liczba to: "+">"+roll()+"<");
+        }
+
+        public static int inputData() throws IOException,NumberFormatException{
+            int input;
+            for(;;) {
+                try {
+                     input = Integer.parseInt(bufferedReader.readLine());
+
+                     if(input >= 0 && input <=36){
+                         roller = input;
+                         break;
+                     }
+                     else if(input < 0 || input > 36){
+                         System.out.println("Nie można dawać minusowych, ani większych");
+                     }
+                }
+                catch(NumberFormatException e){
+                    System.out.println("Kolejny raz jestem na to przygotowany");
+                }
+            }
+            return input;
+        }
+
+        private static void checkingReward() throws IOException, InterruptedException{
+            if(rollee %2 == 1){
+                if(roller %2 == 1){
+                    System.out.println("Wygrałeś!!");
+                    if(roller > 20){
+                        lose *= 1.5;
+                        reward += lose;
+                    }
+                    else if(roller < 20){
+                        lose *= 1.2;
+                        reward += lose;
+                    }
+                }
+                else{
+                    System.out.println("Nic nie wygrałeś");
+                }
+            }
+            else if(rollee %2 == 0){
+                if(roller %2 == 0){
+                    System.out.println("Wygrałeś!!");
+                    System.out.println("");
+                    if(roller > 20){
+                        lose *= 1.5;
+                        reward += lose;
+                    }
+                    else if(roller < 20){
+                        lose *= 1.2;
+                        reward += lose;
+                    }
+                    else if(roller == 0){
+                        lose *= 16;
+                        reward += lose;
+                    }
+                }
+                else{
+                    System.out.println("Nic nie wygrałeś");
+                }
+            }
+            if(reward == 0){
+                System.out.println("Wszystko przegrałeś");
+                loopedGame();
+            }
+        }
+        private static void howMuch() throws IOException{
+            for(;;){
+                try{
+                    int input = Integer.parseInt(bufferedReader.readLine());
+
+                    if(input <= reward && input > 0){
+                        lose = input;
+                        reward -= lose;
+                        break;
+                    }
+                    else{
+                        System.out.println("Nie możesz wprowadzić innej kwoty - mniejszej/większej niż tą, którą dysponujesz");
+                    }
+                }
+                catch (NumberFormatException e){
+                    System.out.println("Ehh, serio?");
+                }
+            }
+            System.out.println("Postawiłeś " +lose+" zł");
+            System.out.println("");
+        }
+        public static void loopedGame() throws IOException,InterruptedException{
+            String choice;
+            for(;;){
+                try {
+                    System.out.println("Jeśli chcesz dalej grać napisz \"tak\", a jeśli nie chcesz, napisz po prostu \"nie\"");
+                    System.out.println("Jeśli chcesz wrócić do menu, wpisz \"menu\"");
+                    choice = bufferedReader.readLine();
+                    switch (choice){
+                        case "tak":
+                            grand();
+                            break;
+                        case "nie":
+                            System.out.println("Dziękuje za zagranie w kasynie !!");
+                            System.exit(0);
+                            break;
+
+                        case "menu":
+                            menuInterface();
+                            break;
+
+                        default:
+                            System.out.println("Popraw pisownię \"nie\" lub \"tak\" musi być z malych liter");
+                            break;
+                    }
+                }
+                catch(NumberFormatException e){
+                    System.out.println("Tu też to nie zadziała xD");
+                }
+            }
+        }
+    }
+    public static class Lotto{
+        public static ArrayList<Integer> arrOfRollCounts = new ArrayList<>();
+        public static HashSet<Integer> arrOfInputCounts2 = new HashSet<>();
+        public static ArrayList<Integer> arrOfInputCounts = new ArrayList<>();
+        public static int count = 0;
+        public static int reward = 0;
+
+        //metoda grand wywołuje wszystke pozsotałe funkcje w klasie Ruletka
+        public static void grand() throws IOException, InterruptedException{
+            System.out.println("Witaj w dziale lotto, zasady są proste, musisz wpisać 6 liczb.......ale liczby muszą się mieścić w przedziale 1 - 49.\nNie możesz również wpisywać tych samych liczb(np: 1,1,1,1). \n Powodzenia!!");
+            System.out.println("Notice: Liczby powtórzone nie bedą brane pod uwagę systemu,\n żeby nie zakłócać gry, nie pojawi się żaden komunikat o tym, a brane będą pod uwagę jedynie 6 unikalnych liczb");
+            roll();
+            inputData();
+            printRoll();
+            checkingEqualityOfNumbers(arrOfInputCounts, arrOfRollCounts);
+            returningReward(count);
+            loopedGame();
+        }
+
+        private static void printRoll() throws InterruptedException{
+            for(int i : arrOfRollCounts){
+                Thread.sleep(1250);
+                System.out.println("."+i+".");
+            }
+        }
+        public static ArrayList<Integer> roll() {
+            Random generator = new Random();
+            int choice;
+            for (int i = 0; i < 7; i++) {
+                choice = generator.nextInt(50) +1;
+                if (arrOfRollCounts.contains(choice)){
+                    continue;
+                }
+                arrOfRollCounts.add(choice);
+
+                if(arrOfRollCounts.size() > 6){
+                    arrOfRollCounts.remove(i);
+                }
+
+            }
+            Collections.sort(arrOfRollCounts);
+            return arrOfRollCounts;
+
+        }
+
+        public static ArrayList<Integer> inputData() throws IOException{
+            int input;
+            for(;;){
+                try {
+                    input = Integer.parseInt(bufferedReader.readLine());
+
+                    if (input > 0 && input < 50) {
+                        arrOfInputCounts2.add(input);
+                    } else {
+                        System.out.println("Musisz podać liczby z przedziału 1 - 49, a także liczby nie mogą się powtarzać");
+                    }
+                    if (arrOfInputCounts2.size() == 6) {
+                        break;
+                    }
+                    if(input < 1){
+                        System.out.println("Nie możesz podawać liczb na minusie");
+                    }
+                }
+                catch(NumberFormatException e){
+                    System.out.println("Z tego co mi wiadamo, to w lotto gra się liczbami, ale co ja tam wiem, to będzie 6? :))");
+                }
+            }
+            for(int i : arrOfInputCounts2){
+                arrOfInputCounts.add(i);
+            }
+            Collections.sort(arrOfInputCounts);
+            return arrOfInputCounts;
+        }
+
+        private static void printInputData() throws IOException{
+            inputData();
+            for(int i: arrOfInputCounts){
+                System.out.println(i);
+            }
+        }
+
+        public static void checkingEqualityOfNumbers(ArrayList<Integer> firstArr, ArrayList<Integer> secondArr){
+            for(int i: firstArr){
+                for(int j: secondArr){
+                    if(i != j){
+                        continue;
+                    }
+                    else if(i == j){
+                        count++;
+                    }
+                }
+            }
+            System.out.println("Trafiłeś "+count+" !");
+        }
+
+        public static void returningReward(int count){
+            if(count < 3){
+            }
+            else if(count == 3){
+                reward += 3000;
+            }
+            else if(count == 4){
+                reward += 5000;
+            }
+            else if(count == 5){
+                reward += 10_000;
+            }
+            else if(count == 6){
+                reward += 14_000_000;
+            }
+
+            System.out.println("Wygrałeś: "+reward+" zł !!!");
+        }
+        public static void loopedGame() throws IOException, InterruptedException{
+            String choice;
+            for(;;){
+                try {
+                    System.out.println("Jeśli chcesz dalej grać napisz \"tak\", a jeśli nie chcesz, napisz po prostu \"nie\"");
+                    System.out.println("Jeśli chcesz wrócić do menu, wpisz \"menu\"");
+                    choice = bufferedReader.readLine();
+                    switch (choice){
+                        case "tak":
+                            count = 0;
+                            reward = 0;
+                            arrOfRollCounts.clear();
+                            arrOfInputCounts.clear();
+                            arrOfInputCounts2.clear();
+                            grand();
+                            break;
+                        case "nie":
+                            System.out.println("Dziękuje za zagranie w kasynie !!");
+                            System.exit(0);
+                            break;
+
+                        case "menu":
+                            menuInterface();
+                            break;
+
+                        default:
+                            System.out.println("Popraw pisownię, \"nie\" lub \"tak\" musi być z malych liter."+"\nI'm ready for more issues Mr.Wiśniewski");
+                            break;
+                    }
+                }
+                catch(NumberFormatException e){
+                    System.out.println();
+                }
+            }
+        }
+    }
+}
+
